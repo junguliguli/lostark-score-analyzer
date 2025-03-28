@@ -63,6 +63,14 @@
         <!-- 분석 결과 섹션 -->
         <div class="section">
             <h3>캐릭터 분석</h3>
+            
+            <!-- 버튼들을 위쪽으로 이동 -->
+            <div class="btn-container" style="margin-bottom: 20px;">
+                <button onclick="analyzeCharacters()" id="analyzeBtn">선택된 캐릭터 분석</button>
+                <button onclick="exportData()" class="secondary">데이터 내보내기</button>
+                <button onclick="openImportModal()" class="secondary">데이터 불러오기</button>
+            </div>
+            
             <div id="analysisEmpty" class="hidden">
                 <p>선택된 캐릭터가 없습니다. 캐릭터를 추가하고 선택해주세요.</p>
             </div>
@@ -74,11 +82,6 @@
             <div id="characterCards" class="character-cards">
                 <!-- 캐릭터 카드가 여기에 표시됩니다 -->
             </div>
-            
-            <div class="btn-container">
-                <button onclick="analyzeCharacters()" id="analyzeBtn">선택된 캐릭터 분석</button>
-                <button onclick="exportData()" class="secondary">데이터 내보내기</button>
-            </div>
         </div>
         
         <!-- 내보내기 결과 모달 (평소엔 숨김) -->
@@ -89,6 +92,17 @@
             <div class="btn-container">
                 <button onclick="copyToClipboard()">클립보드에 복사</button>
                 <button onclick="document.getElementById('exportModal').classList.add('hidden')" class="secondary">닫기</button>
+            </div>
+        </div>
+        
+        <!-- 데이터 불러오기 모달 (평소엔 숨김) -->
+        <div id="importModal" class="section hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 80%; max-width: 600px;">
+            <h3>데이터 불러오기</h3>
+            <p>이전에 내보내기한 JSON 데이터를 붙여넣으세요:</p>
+            <textarea id="importInput" style="min-height: 200px; margin-bottom: 15px;"></textarea>
+            <div class="btn-container">
+                <button onclick="importData()">데이터 불러오기</button>
+                <button onclick="document.getElementById('importModal').classList.add('hidden')" class="secondary">취소</button>
             </div>
         </div>
         
@@ -104,6 +118,10 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- 분할된 자바스크립트 파일들 -->
+    <script src="script-core.js"></script>
+    <script src="script-character-operations.js"></script>
+    <script src="script-analysis.js"></script>
+    <script src="script-data-import-export.js"></script>
 </body>
 </html>
