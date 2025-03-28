@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로스트아크 환산 점수 데이터 파서 (간단 버전)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3 {
+            text-align: center;
+        }
+        
+        .section {
+            background-color: #272727;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background-color: #4a2480;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background-color: #5c2f9e;
+        }
+        
+        button.secondary {
+            background-color: #444;
+        }
+        
+        button.secondary:hover {
+            background-color: #555;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .character-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .character-card {
+            background-color: #333;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .character-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+            text-align: left;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        
+        .stat-name {
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            color: #6ca6e2;
+        }
+        
+        .instructions {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            text-align: left;
+        }
+        
+        .instructions ul {
+            margin-bottom: 0;
+        }
+        
+        .instructions code {
+            background-color: #222;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .analysis-section {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .analysis-section h3 {
+            margin-top: 0;
+            text-align: left;
+        }
+        
+        @media (max-width: 768px) {
+            .character-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>로스트아크 환산 점수 데이터 파서 (간단 버전)</h1>
+        
+        <div class="instructions">
+            <h3>사용 방법</h3>
+            <ul>
+                <li>엑셀 또는 표에서 데이터를 복사한 후 아래 텍스트 영역에 붙여넣기하세요.</li>
+                <li>각 캐릭터의 첫 줄에는 <strong>캐릭터 이름</strong>을 입력하세요.</li>
+                <li>환산 점수 데이터는 "초월", "장비" 등의 키워드가 포함되어야 합니다.</li>
+                <li>값은 <code>29.8%</code>, <code>100.76%</code>와 같은 형식이어야 합니다.</li>
+                <li>여러 캐릭터를 구분하려면 빈 줄을 사용하세요.</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <div class="input-group">
+                <label for="dataInput">환산 점수 데이터 (엑셀에서 복사-붙여넣기)</label>
+                <textarea id="dataInput" placeholder="여기에 데이터를 붙여넣으세요. 예시:
+캐릭터1
+초월 29.8%
+장비 100.76%
+엘릭서 24.55%
+진화, 깨달음, 도약 60.43%
+각인 41.39%
+보석 32.99%
+카드 15%
+악세 품질,특옵 6.49%
+어빌리티 스톤 6.6%
+팔찌 10.19%
+아바타 3.74%
+펫,내실 치특신 9.02%
+
+캐릭터2
+초월 25.8%
+장비 95.76%
+..."></textarea>
+            </div>
+            
+            <div class="btn-container">
+                <button onclick="parseData()">데이터 파싱</button>
+                <button onclick="clearData()" class="secondary">초기화</button>
+            </div>
+        </div>
+        
+        <div id="resultsSection" class="section hidden">
+            <h2>파싱 결과</h2>
+            <div id="characterCards" class="character-cards">
+                <!-- 캐릭터 카드가 여기에 표시됩니다 -->
+            </div>
+            
+            <div id="analysisSection" class="hidden">
+                <h2>캐릭터 비교 분석</h2>
+                <div id="analysisContent"></div>
+            </div>
+            
+            <div class="btn-container">
+                <button onclick="showAnalysis()" id="analyzeBtn" disabled>캐릭터 비교 분석</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 파싱된 캐릭터 데이터를 저장할 배열
+        let parsedCharacters = [];
+        
+        // 데이터 파싱 함수
+        function parseData() {
+            const dataInput = document.getElementById('dataInput').value.trim();
+            if (!dataInput) {
+                alert('데이터를 입력해주세요.');
+                return;
+            }
+            
+            // 캐릭터별로 데이터 분리 (빈 줄로 구분)
+            const characterBlocks = dataInput.split(/\n\s*\n/).filter(block => block.trim() !== '');
+            
+            parsedCharacters = [];
+            
+            // 각 캐릭터 블록 처리
+            characterBlocks.forEach(block => {
+                const lines = block.split('\n').filter(line => line.trim() !== '');
+                if (lines.length === 0) return;
+                
+                // 첫 번째 줄을 캐릭터 이름으로 사용
+                const characterName = lines[0].trim();
+                
+                // 환산 점수 데이터 파싱
+                const stats = {
+                    transcendence: 0,       // 초월
+                    equipment: 0,           // 장비
+                    elixir: 0,              // 엘릭서
+                    evolution: 0,           // 진화, 깨달음, 도약
+                    engravings: 0,          // 각인
+                    gems: 0,                // 보석
+                    cards: 0,               // 카드
+                    accessories: 0,         // 악세 품질,특옵
+                    abilityStone: 0,        // 어빌리티 스톤
+                    bracelet: 0,            // 팔찌
+                    avatar: 0,              // 아바타
+                    pet: 0                  // 펫,내실 치특신
+                };
+                
+                // 첫 번째 줄을 제외한 나머지 줄 처리
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    // 값 추출을 위한 정규식 패턴
+                    const valueMatch = line.match(/(\d+(?:\.\d+)?)/);
+                    const value = valueMatch ? parseFloat(valueMatch[0]) : 0;
+                    
+                    // 각 항목 식별 및 값 저장
+                    if (line.includes('초월')) {
+                        stats.transcendence = value;
+                    } else if (line.includes('장비')) {
+                        stats.equipment = value;
+                    } else if (line.includes('엘릭서')) {
+                        stats.elixir = value;
+                    } else if (line.includes('진화') || line.includes('깨달음') || line.includes('도약')) {
+                        stats.evolution = value;
+                    } else if (line.includes('각인')) {
+                        stats.engravings = value;
+                    } else if (line.includes('보석')) {
+                        stats.gems = value;
+                    } else if (line.includes('카드')) {
+                        stats.cards = value;
+                    } else if (line.includes('악세')) {
+                        stats.accessories = value;
+                    } else if (line.includes('어빌리티') || line.includes('스톤')) {
+                        stats.abilityStone = value;
+                    } else if (line.includes('팔찌')) {
+                        stats.bracelet = value;
+                    } else if (line.includes('아바타')) {
+                        stats.avatar = value;
+                    } else if (line.includes('펫') || line.includes('치특신')) {
+                        stats.pet = value;
+                    }
+                }
+                
+                // 캐릭터 객체 생성
+                const character = {
+                    name: characterName,
+                    stats: stats,
+                    // 총점 계산 (모든 항목의 합)
+                    totalScore: Object.values(stats).reduce((sum, value) => sum + value, 0)
+                };
+                
+                parsedCharacters.push(character);
+            });
+            
+            // 결과 표시
+            displayResults();
+        }
+        
+        // 결과 표시 함수
+        function displayResults() {
+            if (parsedCharacters.length === 0) {
+                alert('유효한 캐릭터 데이터를 찾을 수 없습니다.');
+                return;
+            }
+            
+            const resultsSection = document.getElementById('resultsSection');
+            const characterCards = document.getElementById('characterCards');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            
+            // 결과 섹션 표시
+            resultsSection.classList.remove('hidden');
+            
+            // 기존 카드 삭제
+            characterCards.innerHTML = '';
+            
+            // 각 캐릭터에 대한 카드 생성
+            parsedCharacters.forEach((character, index) => {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                
+                // 카드 내용 생성
+                card.innerHTML = `
+                    <h3>${character.name}</h3>
+                    <div class="stat-row">
+                        <span class="stat-name">초월:</span>
+                        <span class="stat-value">${character.stats.transcendence.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">장비:</span>
+                        <span class="stat-value">${character.stats.equipment.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">엘릭서:</span>
+                        <span class="stat-value">${character.stats.elixir.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">진화, 깨달음, 도약:</span>
+                        <span class="stat-value">${character.stats.evolution.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">각인:</span>
+                        <span class="stat-value">${character.stats.engravings.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">보석:</span>
+                        <span class="stat-value">${character.stats.gems.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">카드:</span>
+                        <span class="stat-value">${character.stats.cards.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">악세 품질,특옵:</span>
+                        <span class="stat-value">${character.stats.accessories.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">어빌리티 스톤:</span>
+                        <span class="stat-value">${character.stats.abilityStone.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">팔찌:</span>
+                        <span class="stat-value">${character.stats.bracelet.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">아바타:</span>
+                        <span class="stat-value">${character.stats.avatar.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">펫,내실 치특신:</span>
+                        <span class="stat-value">${character.stats.pet.toFixed(2)}%</span>
+                    </div>
+                    <div class="stat-row" style="margin-top: 10px; font-weight: bold;">
+                        <span class="stat-name">총 합계:</span>
+                        <span class="stat-value">${character.totalScore.toFixed(2)}%</span>
+                    </div>
+                `;
+                
+                characterCards.appendChild(card);
+            });
+            
+            // 버튼 활성화
+            analyzeBtn.disabled = parsedCharacters.length < 2;
+            
+            // 분석 섹션 숨기기
+            document.getElementById('analysisSection').classList.add('hidden');
+        }
+        
+        // 분석 표시 함수
+        function showAnalysis() {
+            if (parsedCharacters.length < 2) {
+                alert('비교를 위해서는 최소 2개 이상의 캐릭터가 필요합니다.');
+                return;
+            }
+            
+            const analysisSection = document.getElementById('analysisSection');
+            const analysisContent = document.getElementById('analysisContent');
+            
+            analysisSection.classList.remove('hidden');
+            
+            // 카테고리 정의
+            const categories = [
+                '초월', '장비', '엘릭서', '진화/깨달음/도약', 
+                '각인', '보석', '카드', '악세 품질,특옵', 
+                '어빌리티 스톤', '팔찌', '아바타', '펫,내실'
+            ];
+            
+            // 스탯 프로퍼티 매핑
+            const statProps = [
+                'transcendence', 'equipment', 'elixir', 'evolution',
+                'engravings', 'gems', 'cards', 'accessories',
+                'abilityStone', 'bracelet', 'avatar', 'pet'
+            ];
+            
+            // 분석 HTML 생성
+            let analysisHTML = '<div class="analysis-section"><h3>항목별 최소값 분석</h3><ul style="padding-left:20px;">';
+            
+            categories.forEach((category, index) => {
+                const statValues = parsedCharacters.map(character => {
+                    return {
+                        name: character.name,
+                        value: character.stats[statProps[index]]
+                    };
+                });
+                
+                // 최소값 찾기
+                statValues.sort((a, b) => a.value - b.value);
+                const minChar = statValues[0];
+                const maxChar = statValues[statValues.length - 1];
+                
+                // 절대적 차이 계산 (단순 뺄셈)
+                const difference = (maxChar.value - minChar.value).toFixed(2);
+                
+                // 결과 추가
+                analysisHTML += `<li style="margin-bottom:8px;"><strong>${category}:</strong> 
+                    <span style="color:#ff9999;">${minChar.name}</span>이(가) 가장 낮음 (${minChar.value.toFixed(2)}%)`;
+                
+                if (statValues.length > 1) {
+                    analysisHTML += ` - 최고값 ${maxChar.value.toFixed(2)}%와의 차이: ${difference}% 포인트`;
+                }
+                
+                analysisHTML += `</li>`;
+            });
+            
+            // 총점 비교
+            const totalScores = parsedCharacters.map(character => {
+                return {
+                    name: character.name,
+                    value: character.totalScore
+                };
+            });
+            
+            totalScores.sort((a, b) => a.value - b.value);
+            const minTotalChar = totalScores[0];
+            const maxTotalChar = totalScores[totalScores.length - 1];
+            const totalDifference = (maxTotalChar.value - minTotalChar.value).toFixed(2);
+            
+            analysisHTML += `<li style="margin-top:15px;font-weight:bold;"><strong>총 합계:</strong> 
+                <span style="color:#ff9999;">${minTotalChar.name}</span>이(가) 가장 낮음 (${minTotalChar.value.toFixed(2)}%)`;
+            
+            if (totalScores.length > 1) {
+                analysisHTML += ` - 최고값 ${maxTotalChar.value.toFixed(2)}%와의 차이: ${totalDifference}% 포인트`;
+            }
+            
+            analysisHTML += `</li></ul></div>`;
+            
+            // 개선 우선순위 제안
+            if (parsedCharacters.length > 0) {
+                const worstChar = parsedCharacters.reduce((prev, current) => 
+                    prev.totalScore < current.totalScore ? prev : current);
+                
+                const statEntries = Object.entries(worstChar.stats)
+                    .map(([key, value]) => ({ key, value }))
+                    .sort((a, b) => {
+                        // 점수가 낮을수록, 최대값과의 차이가 클수록 우선순위 높음
+                        const maxA = Math.max(...parsedCharacters.map(char => char.stats[a.key] || 0));
+                        const maxB = Math.max(...parsedCharacters.map(char => char.stats[b.key] || 0));
+                        const diffA = maxA - a.value;
+                        const diffB = maxB - b.value;
+                        
+                        // 차이가 큰 것이 우선, 같으면 현재 값이 작은 것이 우선
+                        return diffB - diffA || a.value - b.value;
+                    });
+                
+                const statMapping = {
+                    transcendence: '초월',
+                    equipment: '장비',
+                    elixir: '엘릭서',
+                    evolution: '진화, 깨달음, 도약',
+                    engravings: '각인',
+                    gems: '보석',
+                    cards: '카드',
+                    accessories: '악세 품질,특옵',
+                    abilityStone: '어빌리티 스톤',
+                    bracelet: '팔찌',
+                    avatar: '아바타',
+                    pet: '펫,내실 치특신'
+                };
+                
+                analysisHTML += `<div class="analysis-section" style="margin-top: 20px;">
+                <h3>개선 우선순위 제안 (${worstChar.name})</h3>
+                <p>다음 항목을 순서대로 개선하면 효과적입니다:</p>
+                <ol>`;
+                
+                // 상위 3개 항목만 추출
+                statEntries.slice(0, 3).forEach(stat => {
+                    const maxVal = Math.max(...parsedCharacters.map(char => char.stats[stat.key] || 0));
+                    const diff = maxVal - stat.value;
+                    const diffPercent = diff.toFixed(2);
+                    
+                    analysisHTML += `<li><strong>${statMapping[stat.key]}</strong>: 현재 ${stat.value.toFixed(2)}% → 
+                        최고값 ${maxVal.toFixed(2)}% (차이: ${diffPercent}% 포인트)</li>`;
+                });
+                
+                analysisHTML += `</ol></div>`;
+            }
+            
+            // 분석 결과 표시
+            analysisContent.innerHTML = analysisHTML;
+        }
+        
+        // 데이터 초기화 함수
+        function clearData() {
+            document.getElementById('dataInput').value = '';
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('analysisSection').classList.add('hidden');
+            parsedCharacters = [];
+        }
+    </script>
+</body>
+</html>
