@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로스트아크 환산 점수 분석기</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 추가 스타일 - 이미지 가이드 */
+        .guide-images {
+            margin: 15px 0;
+            text-align: center;
+        }
+        .guide-images img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            border: 2px solid #4a2480;
+        }
+        .guide-images .image-caption {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+        .site-link {
+            color: #6ca6e2;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -12,8 +36,23 @@
         
         <div class="instructions">
             <h3>사용 방법</h3>
-            <p>엑셀이나 문서에서 복사한 캐릭터 정보를 붙여넣기 하여 여러 캐릭터를 비교 분석할 수 있습니다.</p>
-            <p>캐릭터 이름이 없는 경우 자동으로 번호가 부여되며, 캐릭터 목록에서 이름을 클릭하여 수정할 수 있습니다.</p>
+            <p>즐로아(ZLOA) 사이트의 환산 점수를 가져와 여러 캐릭터를 비교 분석할 수 있습니다.</p>
+            
+            <ol>
+                <li><a href="https://zloa.net/" target="_blank" class="site-link">즐로아 사이트(zloa.net)</a>에 접속</li>
+                <li>검색창에 캐릭터 이름을 입력하여 검색</li>
+                <li>검색 결과에서 캐릭터를 클릭하면 상세 정보 확인 가능</li>
+                <li>페이지 하단의 <strong>"환산 점수 상세 영수증"</strong> 부분을 찾음</li>
+                <li>아래 이미지와 같이 환산 점수 영역 전체를 선택하여 복사</li>
+                <li>아래 "대량 가져오기" 텍스트 영역에 붙여넣기</li>
+            </ol>
+            
+            <div class="guide-images">
+                <img src="images/receipt-example.jpg" alt="즐로아 환산 점수 상세 영수증 예시">
+                <div class="image-caption">이런 식으로 초월, 장비, 엘릭서 등 % 값이 있는 부분을 모두 선택하여 복사하세요</div>
+            </div>
+            
+            <p>캐릭터 이름이 데이터에 포함되지 않은 경우 자동으로 번호가 부여되며, 캐릭터 목록에서 이름을 클릭하여 수정할 수 있습니다.</p>
         </div>
         
         <div class="section">
@@ -33,25 +72,20 @@
         <div class="section">
             <h3>대량 가져오기</h3>
             <div class="input-group">
-                <label for="bulkInput">엑셀에서 복사-붙여넣기</label>
-                <textarea id="bulkInput" placeholder="여기에 데이터를 붙여넣으세요. 예시:
-캐릭터1 (첫 줄이 캐릭터 이름입니다. 이름이 없으면 자동으로 번호가 부여됩니다)
+                <label for="bulkInput">즐로아 환산 점수 상세 영수증 붙여넣기</label>
+                <textarea id="bulkInput" placeholder="즐로아 사이트 하단의 '환산 점수 상세 영수증' 부분을 복사하여 여기에 붙여넣으세요. 예시:
 초월 29.8%
-장비 100.76%
-엘릭서 24.55%
-진화, 깨달음, 도약 60.43%
+장비 105.62%
+엘릭서 24.66%
+진화, 깨달음, 도약 60.42%
 각인 41.39%
-보석 32.99%
+보석 32.98%
 카드 15%
-악세 품질,특옵 6.49%
-어빌리티 스톤 6.6%
-팔찌 10.19%
-아바타 3.74%
-펫,내실 치특신 9.02%
-
-두 번째 캐릭터
-초월 25.8%
-..."></textarea>
+악세 품질,특옵 9.16%
+어빌리티 스톤 9.28%
+팔찌 11.87%
+아바타 3.73%
+펫,내실 치특신 9%"></textarea>
             </div>
             
             <div class="btn-container">
